@@ -12,13 +12,12 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\SerializerInterface;
-use Symfony\Component\Validator\Constraints\DateTime;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 
 /**
  * @Route("/partenaire")
+ * 
  */
 class PartenaireController extends AbstractController
 {
@@ -34,7 +33,6 @@ class PartenaireController extends AbstractController
 
     /**
      * @Route("/new", name="partenaire_new", methods={"GET","POST"})
-     * @IsGranted("ROLE_SUPER_ADMIN")
      */
     public function ajout(Request $request,SerializerInterface $serializer, UserPasswordEncoderInterface $passwordEncoder, EntityManagerInterface $entityManager): Response
     {

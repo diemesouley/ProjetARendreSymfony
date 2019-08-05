@@ -17,7 +17,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 
 /**
- * @Route("/api")
+ * @Route("/depot")
  */
 class DepotController extends AbstractController
 {
@@ -33,7 +33,6 @@ class DepotController extends AbstractController
 
     /**
      * @Route("/new", name="depot_new", methods={"GET","POST"})
-     * @IsGranted("ROLE_CAISSIER")
      */
     public function new(Request $request,SerializerInterface $serializer, UserPasswordEncoderInterface $passwordEncoder, EntityManagerInterface $entityManager): Response
     {
