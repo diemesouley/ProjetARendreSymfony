@@ -1,0 +1,11 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}New ComptePartenaire{% endblock %}
+
+{% block body %}
+    <h1>Create new ComptePartenaire</h1>
+
+    {{ include('compte_partenaire/_form.html.twig') }}
+
+    <a href="{{ path('compte_partenaire_index') }}">back to list</a>
+{% endblock %}

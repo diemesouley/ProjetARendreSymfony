@@ -1,0 +1,39 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}ComptePartenaire index{% endblock %}
+
+{% block body %}
+    <h1>ComptePartenaire index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>NumCompte</th>
+                <th>SoldeCompte</th>
+                <th>DateCreation</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for compte_partenaire in compte_partenaires %}
+            <tr>
+                <td>{{ compte_partenaire.id }}</td>
+                <td>{{ compte_partenaire.numCompte }}</td>
+                <td>{{ compte_partenaire.soldeCompte }}</td>
+                <td>{{ compte_partenaire.dateCreation ? compte_partenaire.dateCreation|date('Y-m-d') : '' }}</td>
+                <td>
+                    <a href="{{ path('compte_partenaire_show', {'id': compte_partenaire.id}) }}">show</a>
+                    <a href="{{ path('compte_partenaire_edit', {'id': compte_partenaire.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="5">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('compte_partenaire_new') }}">Create new</a>
+{% endblock %}
