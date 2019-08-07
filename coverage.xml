@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+  <testsuite name="Project Test Suite" tests="2" assertions="2" errors="0" failures="0" skipped="0" time="1.929632">
+    <testsuite name="App\Tests\DepotControllerTest" file="/home/souleymane/Bureau/monWari/samaWari/tests/DepotControllerTest.php" tests="2" assertions="2" errors="0" failures="0" skipped="0" time="1.929632">
+      <testcase name="testSomehing" class="App\Tests\DepotControllerTest" classname="App.Tests.DepotControllerTest" file="/home/souleymane/Bureau/monWari/samaWari/tests/DepotControllerTest.php" line="10" assertions="1" time="0.856904"/>
+      <testcase name="testUser" class="App\Tests\DepotControllerTest" classname="App.Tests.DepotControllerTest" file="/home/souleymane/Bureau/monWari/samaWari/tests/DepotControllerTest.php" line="28" assertions="1" time="1.072728"/>
+    </testsuite>
+  </testsuite>
+</testsuites>

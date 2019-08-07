@@ -20,9 +20,11 @@ class SecurityController extends AbstractController
      */
     public function register(Request $request, UserPasswordEncoderInterface $passwordEncoder, EntityManagerInterface $entityManager)
     {
-        $values = json_decode($request->getContent());
-        if(isset($values->username,$values->password)) {
             $user = new User();
+            $form = $this->createForm(UserType::class, $user);
+            $form->handleRequest($request);
+            $values=$request->reauest->all();
+            $form->submit($values);
             $user->setUsername($values->username);
             $user->setPassword($passwordEncoder->encodePassword($user, $values->password));
             $user->setRoles($values->roles);
@@ -43,7 +45,7 @@ class SecurityController extends AbstractController
             ];
 
             return new JsonResponse($data, 201);
-        }
+        
         $data = [
             'status' => 500,
             'message' => 'Vous devez renseigner les clés username et password'

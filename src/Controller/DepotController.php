@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 
+use App\Entity\User;
 use App\Entity\Depot;
 use App\Form\DepotType;
 use App\Entity\ComptePartenaire;
@@ -36,11 +37,12 @@ class DepotController extends AbstractController
      */
     public function new(Request $request,SerializerInterface $serializer, UserPasswordEncoderInterface $passwordEncoder, EntityManagerInterface $entityManager): Response
     {
+        $user = new User();
         $values = json_decode($request->getContent());
 
         $depot = new Depot();
         $depot->setMontant($values->montant);
-        if(($values->montant)<74999){
+        if(($values->montant)<=74999){
             return new Response('le montant doit etre superieur ou egale à 75000', Response::HTTP_CREATED);
         }else {
             $depot->setDateDepot(new \DateTime());
