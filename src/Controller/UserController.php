@@ -10,11 +10,12 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\SerializerInterface;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 
 /**
- * @Route("/user")
+ * @Route("/api")
  */
 class UserController extends AbstractController
 {
@@ -29,10 +30,16 @@ class UserController extends AbstractController
     }
 
     /**
-     * @Route("/new", name="user_new", methods={"GET","POST"})
+     * @Route("/ajoutUser", name="user_new", methods={"GET","POST"})
+     * 
+     * @IsGranted("ROLE_SUPER_ADMIN")
      */
-    public function ajout(Request $request,SerializerInterface $serializer, UserPasswordEncoderInterface $passwordEncoder, EntityManagerInterface $entityManager): Response
+    public function ajoutUser(Request $request,SerializerInterface $serializer, UserPasswordEncoderInterface $passwordEncoder, EntityManagerInterface $entityManager): Response
     {
+
+//denyAccessUnlessGranted accepte un tableau de noms de rôle, 
+
+//$this->denyAccessUnlessGranted(["ROLE_SUPER_ADMIN", "ROLE_ADMIN"], $item, 'Vous n\'avez pas accés a cette fonctionnalité.');
         $values = json_decode($request->getContent());
         $entityManager = $this->getDoctrine()->getManager();
 

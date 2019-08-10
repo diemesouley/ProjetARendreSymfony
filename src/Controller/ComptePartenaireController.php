@@ -11,7 +11,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
- * @Route("/compte/partenaire")
+ * @Route("/api")
  */
 class ComptePartenaireController extends AbstractController
 {
@@ -26,9 +26,9 @@ class ComptePartenaireController extends AbstractController
     }
 
     /**
-     * @Route("/new", name="compte_partenaire_new", methods={"GET","POST"})
+     * @Route("/ajoutCompte", name="compte_partenaire_new", methods={"GET","POST"})
      */
-    public function new(Request $request): Response
+    public function ajoutCompte(Request $request): Response
     {
         $comptePartenaire = new ComptePartenaire();
         $form = $this->createForm(ComptePartenaireType::class, $comptePartenaire);

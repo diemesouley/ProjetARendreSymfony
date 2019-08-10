@@ -18,7 +18,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 
 /**
- * @Route("/depot")
+ * @Route("/api")
  */
 class DepotController extends AbstractController
 {
@@ -33,14 +33,16 @@ class DepotController extends AbstractController
     }
 
     /**
-     * @Route("/new", name="depot_new", methods={"GET","POST"})
+     * @Route("/depot", name="depot_new", methods={"GET","POST"})
+     * 
+     * @IsGranted("ROLE_CAISSIER")
      */
-    public function new(Request $request,SerializerInterface $serializer, UserPasswordEncoderInterface $passwordEncoder, EntityManagerInterface $entityManager): Response
+    public function depot(Request $request,SerializerInterface $serializer, UserPasswordEncoderInterface $passwordEncoder, EntityManagerInterface $entityManager): Response
     {
-        $user = new User();
+        $user=new User();
         $values = json_decode($request->getContent());
-
         $depot = new Depot();
+
         $depot->setMontant($values->montant);
         if(($values->montant)<=74999){
             return new Response('le montant doit etre superieur ou egale à 75000', Response::HTTP_CREATED);
@@ -50,8 +52,11 @@ class DepotController extends AbstractController
             $partenaire->setSoldeCompte($partenaire->getSoldeCompte() + $values->montant);
             $depot->setComptePartenaire($partenaire);
             $user=$this->getUser();
+            var_dump($user);die();
+            //$user=$this->getDoctrine()->getRepository(User::class)->find($values->user_id);
             $depot->setUser($user);
-    
+
+                
                 $entityManager->persist($depot);
                 $entityManager->flush();
                 return new Response('Depot effectué', Response::HTTP_CREATED);

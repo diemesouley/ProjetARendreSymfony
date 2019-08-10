@@ -3,18 +3,28 @@
 namespace App\Controller;
 
 use App\Entity\User;
+use App\Form\UserType;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Lexik\Bundle\JWTAuthenticationBundle\Encoder\JWTEncoderInterface;
+use Symfony\Component\Security\Core\Exception\BadCredentialsException;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
+use Lexik\Bundle\JWTAuthenticationBundle\Exception\JWTEncodeFailureException;
 
 /**
  * @Route("/api")
  */
 class SecurityController extends AbstractController
 {
+    private $passwordEncoder;
+
+        public function __construct(UserPasswordEncoderInterface $passwordEncoder)
+        {
+          $this->passwordEncoder = $passwordEncoder;
+        }
     /**
      * @Route("/register", name="register", methods={"POST"})
      */
@@ -52,17 +62,45 @@ class SecurityController extends AbstractController
         ];
         return new JsonResponse($data, 500);
     }
-
-     /**
-     * @Route("/login_check", name="login", methods={"POST"})
+    /**
+     * @Route("/login", name="login", methods={"POST"})
+     * @param JWTEncoderInterface $JWTEncoder
+     * @return JsonResponse
+     * @throws \Lexik\Bundle\JWTAuthenticationBundle\Exception\JWTEncodeFailureException
      */
-    public function login(Request $request)
+     
+    
+        
+    public function login(Request $request,JWTEncoderInterface $JWTEncoder)
     {
-        $user = $this->getUser();
-        return $this->json([
-            'username' => $user->getUsername(),
-            'roles' => $user->getRoles()
-        ]);
-    }
+     
+            $values=json_decode($request->getContent());
+            $user = $this->getDoctrine()->getRepository(User::class)->findOneBy([
+                'username' => $values->username
+                
+            ]);
+
+            if (!$user) {
+                return new JsonResponse(['l\'utilisateur n\'existe pas']);
+            }
+                $isValid = $this->passwordEncoder->isPasswordValid($user, $values->password);
+                
+            if (!$isValid) {
+                return new JsonResponse(['Veuillez saisir un bon mot de pass']);
+            }
+            if ($user->getStatusUser()=='Désactivé') {
+
+                return new JsonResponse(['Veuillez contacter votre administrateur vous etes bloqué']);
+            }
+    
+            
+            $token = $JWTEncoder->encode([
+                    'username' => $user->getUsername(),
+                    'exp' => time() + 3600 // 1 hour expiration
+                ]);
+    
+            return new JsonResponse(['token' => $token]);
+        }
+        
 
 }

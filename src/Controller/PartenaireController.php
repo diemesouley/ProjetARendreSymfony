@@ -12,11 +12,12 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\SerializerInterface;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 
 /**
- * @Route("/partenaire")
+ * @Route("/api")
  * 
  */
 class PartenaireController extends AbstractController
@@ -32,9 +33,11 @@ class PartenaireController extends AbstractController
     }
 
     /**
-     * @Route("/new", name="partenaire_new", methods={"GET","POST"})
+     * @Route("/ajoutPartenaire", name="partenaire_new", methods={"GET","POST"})
+     * 
+     * @IsGranted("ROLE_SUPER_ADMIN")
      */
-    public function ajout(Request $request,SerializerInterface $serializer, UserPasswordEncoderInterface $passwordEncoder, EntityManagerInterface $entityManager): Response
+    public function ajoutPartenaire(Request $request,SerializerInterface $serializer, UserPasswordEncoderInterface $passwordEncoder, EntityManagerInterface $entityManager): Response
     {
         $values = json_decode($request->getContent());
         $entityManager = $this->getDoctrine()->getManager();
