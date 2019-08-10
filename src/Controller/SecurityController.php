@@ -20,7 +20,7 @@ use Lexik\Bundle\JWTAuthenticationBundle\Exception\JWTEncodeFailureException;
 class SecurityController extends AbstractController
 {
     private $passwordEncoder;
-
+                                                                                                                                                                                    
         public function __construct(UserPasswordEncoderInterface $passwordEncoder)
         {
           $this->passwordEncoder = $passwordEncoder;

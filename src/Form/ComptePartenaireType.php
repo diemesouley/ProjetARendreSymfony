@@ -2,12 +2,14 @@
 
 namespace App\Form;
 
+use App\Entity\User;
+use App\Entity\Partenaire;
 use App\Entity\ComptePartenaire;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
-use App\Entity\User;
 
 class ComptePartenaireType extends AbstractType
 {

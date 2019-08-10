@@ -22,7 +22,7 @@ final class Version20190805162124 extends AbstractMigration
         // this up() migration is auto-generated, please modify it to your needs
         $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'mysql', 'Migration can only be executed safely on \'mysql\'.');
 
-        $this->addSql('ALTER TABLE user ADD filename VARCHAR(255) NOT NULL');
+        $this->addSql('ALTER TABLE user ADD filename VARCHAR(255)');
     }
 
     public function down(Schema $schema) : void

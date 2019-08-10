@@ -3,7 +3,9 @@
 namespace App\Controller;
 
 use App\Entity\User;
+use App\Entity\Depot;
 use App\Form\UserType;
+use App\Entity\ComptePartenaire;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -36,29 +38,44 @@ class UserController extends AbstractController
      */
     public function ajoutUser(Request $request,SerializerInterface $serializer, UserPasswordEncoderInterface $passwordEncoder, EntityManagerInterface $entityManager): Response
     {
+        
+        //$values = json_decode($request->getContent(),true);
+        $user=new User();
 
-//denyAccessUnlessGranted accepte un tableau de noms de rôle, 
+        #$user->setUsername($values->username);
+        #$user->setPassword($values->password);
+        #$user->setRoles($values->role);
+        #$user->setMatriculeUser($values->matriculeUser);
+        #$user->setNomUser($values->nomUser);
+        #$user->setPrenomUser($values->prenomUser);
+        #$user->setEmailUser($values->emailUser);
+        #$user->setAdresseUser($values->adresseUser);
+        #$user->setTelephoneUser($values->telephoneUser);
+        #$user->setStatusUser($values->statusUser);
+        #$user->setImageFile($values->imageFile);
+            $form=$this->createForm(UserType::class,$user);
+            $form->handleRequest($request);
+            $values=$request->request->all();
+            $file=$request->files->all()[
+                "imageName"
+            ];
+          
+            $form->submit($values);
+            //var_dump($values);die();
+            
+            $user->setRoles(["ROLE_USER_SIMPLE"]);
+            if ($form->isSubmitted() ) {
+            $user->setImageFile($file);
+            //var_dump($user);die();
 
-//$this->denyAccessUnlessGranted(["ROLE_SUPER_ADMIN", "ROLE_ADMIN"], $item, 'Vous n\'avez pas accés a cette fonctionnalité.');
-        $values = json_decode($request->getContent());
-        $entityManager = $this->getDoctrine()->getManager();
+            $entityManager=$this->getDoctrine()->getManager();
+                $entityManager->persist($user);
+                $entityManager->flush();
+                return new Response('User Créé avec succé', Response::HTTP_CREATED);
+            }
+        
+    }
 
-        $user = new User();
-        $user->setUsername($values->username);
-        $user->setPassword($passwordEncoder->encodePassword($user, $values->password));
-        $user->setRoles($values->roles);
-        $user->setMatriculeUser($values->matriculeUser);
-        $user->setNomUser($values->nomUser);
-        $user->setPrenomUser($values->prenomUser);
-        $user->setEmailUser($values->emailUser);
-        $user->setAdresseUser($values->adresseUser);
-        $user->setTelephoneUser($values->telephoneUser);
-        $user->setStatusUser($values->statusUser);
-        $entityManager->persist($user);
-        $entityManager->flush();
-        return new Response('Caissier ajouter', Response::HTTP_CREATED);
-
-        }
     /**
      * @Route("/{id}", name="user_show", methods={"GET"})
      */
