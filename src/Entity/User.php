@@ -3,18 +3,16 @@
 namespace App\Entity;
 
 use App\Entity\Depot;
-use DateTimeInterface;
+use App\Entity\Transaction;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\Collection;
 use Symfony\Component\HttpFoundation\File\File;
 use Doctrine\Common\Collections\ArrayCollection;
-use Symfony\Component\Serializer\Annotation\Groups;
 use Vich\UploaderBundle\Mapping\Annotation as Vich;
-use Symfony\Component\Validator\Constraints as Assert;
-use Vich\UploaderBundle\Mapping\Annotation\Uploadable;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Security\Core\User\UserInterface;
-use Symfony\Component\Validator\Constraints\Collection;
-use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Serializer\Annotation\Groups;
+
 /**
  * @ORM\Entity(repositoryClass="App\Repository\UserRepository")
  * @Vich\Uploadable
@@ -25,16 +23,19 @@ class User implements UserInterface
      * @ORM\Id()
      * @ORM\GeneratedValue()
      * @ORM\Column(type="integer")
+     * @Groups({"list", "show"})
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=180, unique=true)
+     * @Groups({"list", "show"})
      */
     private $username;
 
     /**
      * @ORM\Column(type="json")
+     * @Groups({"list", "show"})
      */
     private $roles = [];
 
@@ -46,36 +47,43 @@ class User implements UserInterface
 
     /**
      * @ORM\Column(type="string", length=50)
+     * @Groups({"list", "show"})
      */
     private $matriculeUser;
 
     /**
      * @ORM\Column(type="string", length=50)
+     * @Groups({"list", "show"})
      */
     private $nomUser;
 
     /**
      * @ORM\Column(type="string", length=50)
+     * @Groups({"list", "show"})
      */
     private $prenomUser;
 
     /**
      * @ORM\Column(type="string", length=50)
+     * @Groups({"list", "show"})
      */
     private $emailUser;
 
     /**
      * @ORM\Column(type="string", length=50)
+     * @Groups({"list", "show"})
      */
     private $adresseUser;
 
     /**
      * @ORM\Column(type="integer")
+     * @Groups({"list", "show"})
      */
     private $telephoneUser;
 
     /**
      * @ORM\Column(type="string", length=25)
+     * @Groups({"list", "show"})
      */
     private $statusUser;
 
@@ -91,8 +99,14 @@ class User implements UserInterface
 
     /**
      * @ORM\OneToMany(targetEntity="App\Entity\Depot", mappedBy="User")
+
      */
     private $depots;
+
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\Transaction", mappedBy="User")
+     */
+    private $transaction;
      /**
      * NOTE: This is not a mapped field of entity metadata, just a simple property.
      * 
@@ -104,14 +118,13 @@ class User implements UserInterface
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
-     *
+     * @Groups({"list", "show"})
      * @var string
      */
     private $imageName;
 
     /**
      * @ORM\Column(type="datetime",nullable=true )
-     *
      * @var \DateTime|null
      */
     private $updatedAt;
@@ -150,7 +163,7 @@ class User implements UserInterface
     {
         $roles = $this->roles;
         // guarantee every user at least has ROLE_USER
-        $roles[] = 'ROLE_USER';
+       // $roles[] = 'ROLE_USER';
 
         return array_unique($roles);
     }
@@ -303,6 +316,36 @@ class User implements UserInterface
     }
 
     /**
+     * @return Collection|Transaction[]
+     */
+    public function getTransaction(): Collection
+    {
+        return $this->transaction;
+    }
+
+    public function addTransaction(Transaction $transaction): self
+    {
+        if (!$this->transaction->contains($transaction)) {
+            $this->transaction[] = $transaction;
+            $transaction->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeTransaction(Transaction $transaction): self
+    {
+        if ($this->transaction->contains($transaction)) {
+            $this->transaction->removeElement($transaction);
+            // set the owning side to null (unless already changed)
+            if ($transaction->getUser() === $this) {
+                $transaction->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+     /**
      * @return Collection|Depot[]
      */
     public function getDepots(): Collection

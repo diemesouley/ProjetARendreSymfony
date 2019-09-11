@@ -34,8 +34,6 @@ class DepotController extends AbstractController
 
     /**
      * @Route("/depot", name="depot_new", methods={"GET","POST"})
-     * 
-     * @IsGranted("ROLE_CAISSIER")
      */
     public function depot(Request $request,SerializerInterface $serializer, UserPasswordEncoderInterface $passwordEncoder, EntityManagerInterface $entityManager): Response
     {
@@ -52,11 +50,11 @@ class DepotController extends AbstractController
             $partenaire->setSoldeCompte($partenaire->getSoldeCompte() + $values->montant);
             $depot->setComptePartenaire($partenaire);
             $user=$this->getUser();
-            var_dump($user);die();
+           //var_dump($user);die();
             //$user=$this->getDoctrine()->getRepository(User::class)->find($values->user_id);
             $depot->setUser($user);
 
-                
+    
                 $entityManager->persist($depot);
                 $entityManager->flush();
                 return new Response('Depot effectué', Response::HTTP_CREATED);

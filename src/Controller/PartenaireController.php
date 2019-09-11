@@ -3,9 +3,11 @@
 namespace App\Controller;
 
 use App\Entity\User;
+use App\Form\UserType;
 use App\Entity\Partenaire;
 use App\Form\PartenaireType;
 use App\Entity\ComptePartenaire;
+use App\Form\ComptePartenaireType;
 use App\Repository\PartenaireRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -16,8 +18,9 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 
+
 /**
- * @Route("/api")
+ * @Route("/api/part")
  * 
  */
 class PartenaireController extends AbstractController
@@ -34,25 +37,21 @@ class PartenaireController extends AbstractController
 
     /**
      * @Route("/ajoutPartenaire", name="partenaire_new", methods={"GET","POST"})
-     * 
-     * @IsGranted("ROLE_SUPER_ADMIN")
      */
-    public function ajoutPartenaire(Request $request,SerializerInterface $serializer, UserPasswordEncoderInterface $passwordEncoder, EntityManagerInterface $entityManager): Response
-    {
-        $values = json_decode($request->getContent());
-        $entityManager = $this->getDoctrine()->getManager();
-
+    public function ajoutPartenaire(Request $request, UserPasswordEncoderInterface $passwordEncoder, EntityManagerInterface $entityManager): Response
+    { 
+        
         $partenaire = new Partenaire();
-        $partenaire->setMatricule($values->matricule);
-        $partenaire->setNomPartenaire($values->nomPartenaire);
-        $partenaire->setNinea($values->ninea);
-        $partenaire->setEmailPartenaire($values->emailPartenaire);
-        $partenaire->setAdressePartenaire($values->adressePartenaire);
-        $partenaire->setTelephonePartenaire($values->telephonePartenaire);
-        $partenaire->setStatus($values->status);
-
+        $form1=$this->createForm(PartenaireType::class,$partenaire);
+        //$form1->handleRequest($request);
+        $values=$request->request->all();
+        $entityManager=$this->getDoctrine()->getManager();
+        $form1->submit($values);
         $comptePartenaire = new ComptePartenaire();
-        $entrp=$values->telephonePartenaire;
+      //  $form=$this->createForm(ComptePartenaireType::class,$comptePartenaire);
+         //   $form->handleRequest($request);
+          //   $form->submit($values);
+        $entrp=978;
         $ncp=substr($entrp,0,2);
         while (true) {
             if(time() % 1==0){
@@ -62,35 +61,73 @@ class PartenaireController extends AbstractController
                 slep(1);
             }
         }
-        $concat=$ncp+$test;
-        $comptePartenaire->setNumCompte($concat);
-        $comptePartenaire->setSoldeCompte($values->soldeCompte);
-        $comptePartenaire->setDateCreation(new \DateTime($values->dateCreation));
+        $concatTT=$ncp + $test;
+        $comptePartenaire->setNumCompte($concatTT);
+        $solde=0;
+        $comptePartenaire->setSoldeCompte($solde);
+        $comptePartenaire->setDateCreation(new \DateTime());
         $comptePartenaire->setPartenaire($partenaire);
+        $entityManager=$this->getDoctrine()->getManager();
 
-        $user = new User();
-        $user->setUsername($values->username);
-        $user->setPassword($passwordEncoder->encodePassword($user, $values->password));
-        $user->setRoles($values->roles);
-        $user->setMatriculeUser($values->matriculeUser);
-        $user->setNomUser($values->nomUser);
-        $user->setPrenomUser($values->prenomUser);
-        $user->setEmailUser($values->emailUser);
-        $user->setAdresseUser($values->adresseUser);
-        $user->setTelephoneUser($values->telephoneUser);
-        $user->setStatusUser($values->statusUser);
-        $user->setPartenaire($partenaire);
-        $user->setComptePartenaire($comptePartenaire);
 
         $entityManager->persist($partenaire);
         $entityManager->persist($comptePartenaire);
+
+        $user=new User();
+
+            $form1=$this->createForm(UserType::class,$user);
+            $form1->handleRequest($request);
+            $values=$request->request->all();
+            $file=$request->files->all()["imageName"];
+          
+            $form1->submit($values);
+            $user->setPartenaire($partenaire);
+            $user->setComptePartenaire($comptePartenaire);
+            
+            $user->setRoles(["ROLE_ADMIN"]);
+                $hash = $passwordEncoder->encodePassword($user, $user->getPassword());
+                $user->setPassword($hash);
+    
+            $user->setImageFile($file);
+
+            $entityManager=$this->getDoctrine()->getManager();
+
+        
         $entityManager->persist($user);
 
         $entityManager->flush();
         return new Response('Partenaire ajouter', Response::HTTP_CREATED);
-
         }
-
+     /**
+     * @Route("/ajoutUserPart/{id}", name="usernewPart", methods={"POST"})
+     * 
+     */
+    public function ajoutUserPart(Request $request, UserPasswordEncoderInterface $passwordEncoder, EntityManagerInterface $entityManager, $id): Response
+    {
+        
+        //$values = json_decode($request->getContent(),true);
+        $user=new User();
+        $partenaire=$this->getDoctrine()->getRepository(Partenaire::class)->findOneBy(['id'=>$id]);
+            $form=$this->createForm(UserType::class,$user);
+            $form->handleRequest($request);
+            $values=$request->request->all();
+            $file=$request->files->all()[
+                "imageName"
+            ];
+            $user->setRoles(["ROLE_USER_SIMPLE"]);
+          
+            $form->submit($values);
+            if ($form->isSubmitted() ) {
+                $hash = $passwordEncoder->encodePassword($user, $user->getPassword());
+                $user->setPassword($hash);
+                $user->setImageFile($file);
+                $user->setPartenaire($partenaire);
+                $entityManager=$this->getDoctrine()->getManager();
+                $entityManager->persist($user);
+                $entityManager->flush();
+                return new Response('User Créé avec succé', Response::HTTP_CREATED);
+            }
+        }
     /**
      * @Route("/{id}", name="partenaire_show", methods={"GET"})
      */
@@ -98,6 +135,21 @@ class PartenaireController extends AbstractController
     {
         return $this->render('partenaire/show.html.twig', [
             'partenaire' => $partenaire,
+        ]);
+    }
+    
+    /**
+     * @Route("/partenaires/{id}", name="partenairesLister", methods={"GET","POST"})
+     */
+    public function lister(Partenaire $partenaire,SerializerInterface $serializer, PartenaireRepository $partenaireRepository)
+    {
+        $partenaire = $partenaireRepository->findAll();
+       //var_dump($partenaire);die();
+        $data = $serializer->serialize($partenaire, 'json', [
+            'groups' => ['show']
+        ]);
+        return new Response($data, 200, [
+            'Content-Types' => 'applications/json'
         ]);
     }
 
@@ -120,6 +172,7 @@ class PartenaireController extends AbstractController
             'form' => $form->createView(),
         ]);
     }
+    
 
     /**
      * @Route("/{id}", name="partenaire_delete", methods={"DELETE"})

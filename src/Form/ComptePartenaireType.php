@@ -18,7 +18,7 @@ class ComptePartenaireType extends AbstractType
         $builder
             ->add('numCompte')
             ->add('soldeCompte')
-            ->add('dateDepot',DateType::class,[
+            ->add('dateCreation',DateType::class,[
                 'widget'=>"single_text",
                 'format'=>"yyyy-MM-dd"
             ])

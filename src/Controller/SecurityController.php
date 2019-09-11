@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Partenaire;
 use App\Entity\User;
 use App\Form\UserType;
 use Doctrine\ORM\EntityManagerInterface;
@@ -10,9 +11,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Lexik\Bundle\JWTAuthenticationBundle\Encoder\JWTEncoderInterface;
-use Symfony\Component\Security\Core\Exception\BadCredentialsException;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
-use Lexik\Bundle\JWTAuthenticationBundle\Exception\JWTEncodeFailureException;
 
 /**
  * @Route("/api")
@@ -26,32 +25,55 @@ class SecurityController extends AbstractController
           $this->passwordEncoder = $passwordEncoder;
         }
     /**
-     * @Route("/register", name="register", methods={"POST"})
+     * @Route("/register/{id}", name="register", methods={"POST","GET"})
      */
-    public function register(Request $request, UserPasswordEncoderInterface $passwordEncoder, EntityManagerInterface $entityManager)
+    public function register(Request $request, EntityManagerInterface $entityManager, $id)
     {
-            $user = new User();
-            $form = $this->createForm(UserType::class, $user);
-            $form->handleRequest($request);
-            $values=$request->reauest->all();
-            $form->submit($values);
-            $user->setUsername($values->username);
-            $user->setPassword($passwordEncoder->encodePassword($user, $values->password));
-            $user->setRoles($values->roles);
-            $user->setMatriculeUser($values->matriculeUser);
-            $user->setNomUser($values->nomUser);
-            $user->setPrenomUser($values->prenomUser);
-            $user->setEmailUser($values->emailUser);
-            $user->setAdresseUser($values->adresseUser);
-            $user->setTelephoneUser($values->telephoneUser);
-            $user->setStatusUser($values->statusUser);
-    
+            $user=$this->getDoctrine()->getRepository(User::class)->findOneBy(['id'=>$id]);
+           //var_dump($user->getStatusUser());die();
+            if ($user->getStatusUser()=='Activé') {
+                $user->setStatusUser("Désactive");
+            }else{
+                $user->setStatusUser("Activé");
+            }
+           // var_dump($user);die();
             $entityManager->persist($user);
             $entityManager->flush();
 
             $data = [
                 'status' => 201,
-                'message' => 'L\'utilisateur a été créé'
+                'message' => 'Le status de l\'utilisateur a été créé'
+            ];
+
+            return new JsonResponse($data, 201);
+        
+        $data = [
+            'status' => 500,
+            'message' => 'Vous devez renseigner les clés username et password'
+        ];
+        return new JsonResponse($data, 500);
+    }
+
+    /**
+     * @Route("/registerPart/{id}", name="registerPart", methods={"POST","GET"})
+     */
+    public function registerPart(Request $request, EntityManagerInterface $entityManager, $id)
+    {
+            $partenaire=$this->getDoctrine()->getRepository(Partenaire::class)->findOneBy(['id'=>$id]);
+            $users=$partenaire->getUsers();
+        //var_dump($users);die();
+            if ($partenaire->getStatus()=='Activé') {
+                $partenaire->setStatus("Désactivé");
+            }else{
+                $partenaire->setStatus("Activé");
+            }
+           // var_dump($user);die();
+            $entityManager->persist($partenaire);
+            $entityManager->flush();
+
+            $data = [
+                'status' => 201,
+                'message' => 'Le status du partenaire a été modifier'
             ];
 
             return new JsonResponse($data, 201);
@@ -88,10 +110,11 @@ class SecurityController extends AbstractController
             if (!$isValid) {
                 return new JsonResponse(['Veuillez saisir un bon mot de pass']);
             }
-            if ($user->getStatusUser()=='Désactivé') {
+
+            /** if ($partenaire->$user->getStatusUser()=='Désactivé') {
 
                 return new JsonResponse(['Veuillez contacter votre administrateur vous etes bloqué']);
-            }
+            }*/
     
             
             $token = $JWTEncoder->encode([

@@ -3,21 +3,25 @@
 namespace App\Controller;
 
 use App\Entity\User;
-use App\Entity\Depot;
 use App\Form\UserType;
+use App\Entity\Partenaire;
 use App\Entity\ComptePartenaire;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 
 /**
- * @Route("/api")
+ * @Route("/api/uti")
  */
 class UserController extends AbstractController
 {
@@ -32,48 +36,52 @@ class UserController extends AbstractController
     }
 
     /**
-     * @Route("/ajoutUser", name="user_new", methods={"GET","POST"})
-     * 
-     * @IsGranted("ROLE_SUPER_ADMIN")
+     * @Route("/ajoutUser", name="usernew", methods={"GET","POST"})
      */
-    public function ajoutUser(Request $request,SerializerInterface $serializer, UserPasswordEncoderInterface $passwordEncoder, EntityManagerInterface $entityManager): Response
+    public function ajoutUser(Request $request, UserPasswordEncoderInterface $passwordEncoder, EntityManagerInterface $entityManager): Response
     {
         
         //$values = json_decode($request->getContent(),true);
         $user=new User();
 
-        #$user->setUsername($values->username);
-        #$user->setPassword($values->password);
-        #$user->setRoles($values->role);
-        #$user->setMatriculeUser($values->matriculeUser);
-        #$user->setNomUser($values->nomUser);
-        #$user->setPrenomUser($values->prenomUser);
-        #$user->setEmailUser($values->emailUser);
-        #$user->setAdresseUser($values->adresseUser);
-        #$user->setTelephoneUser($values->telephoneUser);
-        #$user->setStatusUser($values->statusUser);
-        #$user->setImageFile($values->imageFile);
             $form=$this->createForm(UserType::class,$user);
             $form->handleRequest($request);
             $values=$request->request->all();
             $file=$request->files->all()[
                 "imageName"
             ];
+            $user->setRoles(["ROLE_USER_SIMPLE"]);
           
             $form->submit($values);
-            //var_dump($values);die();
-            
-            $user->setRoles(["ROLE_USER_SIMPLE"]);
             if ($form->isSubmitted() ) {
-            $user->setImageFile($file);
-            //var_dump($user);die();
+                $hash = $passwordEncoder->encodePassword($user, $user->getPassword());
+                $user->setPassword($hash);
+                $user->setImageFile($file);
 
-            $entityManager=$this->getDoctrine()->getManager();
+                $entityManager=$this->getDoctrine()->getManager();
                 $entityManager->persist($user);
                 $entityManager->flush();
                 return new Response('User Créé avec succé', Response::HTTP_CREATED);
             }
         
+    }
+
+    /**
+     * @Route("/listerUser/{id}", name="listerUsers", methods={"GET","POST"})
+     * 
+     * @IsGranted("ROLE_SUPER_ADMIN")
+     */
+    public function listerUser(User $user,SerializerInterface $serializer, UserRepository $userRepository)
+    {
+        $user = $userRepository->findAll();
+        
+        $data = $serializer->serialize($user, 'json', [
+            'groups' => ['show']
+        ]);
+        var_dump($user);die();
+        return new Response($data, 200, [
+            'Content-Types' => 'applications/json'
+        ]);
     }
 
     /**
@@ -106,6 +114,22 @@ class UserController extends AbstractController
         ]);
     }
 
+     /**
+     * @Route("/userLister/{id}", name="userLister", methods={"GET","POST"}) 
+     * 
+     * @IsGranted("ROLE_SUPER_ADMIN")
+     */
+    public function userListe(User $user,SerializerInterface $serializer, UserRepository $userRepository)
+    {
+        $user = $userRepository->findAll();
+        //var_dump($user);die();
+        $data = $serializer->serialize($user, 'json', [
+            'groups' => ['show']
+        ]);
+        return new Response($data, 200, [
+            'Content-Types' => 'applications/json'
+        ]);
+    }
     /**
      * @Route("/{id}", name="user_delete", methods={"DELETE"})
      */

@@ -1,0 +1,67 @@
+public function photo(Request $request, ){
+    $upload = new Upload();
+    $form = $this->createForm(UploadType::class, $upload);
+    $form->handleRequest($request);
+    $file=$request->files->get('name');
+    $name=md5(uniqid().'.png');
+    $file->move('/var/www/html',$name);
+    $b=$file->gessExtension();
+    
+}
+
+$comptePartenaire = new ComptePartenaire();
+$form=$this->createForm(ComptePartenaireType::class,$user);
+            $form->handleRequest($request);
+             $form->submit($values);
+
+        $entrp=$values->telephonePartenaire;
+        $ncp=substr($entrp,0,2);
+        while (true) {
+            if(time() % 1==0){
+                $test = rand(100,200);
+                break;
+            }else{
+                slep(1);
+            }
+        }
+        $concat=$ncp+$test;
+        $comptePartenaire->setNumCompte($concat);
+        $comptePartenaire->setSoldeCompte($values->soldeCompte);
+        $comptePartenaire->setDateCreation(new \DateTime($values->dateCreation));
+        $comptePartenaire->setPartenaire($partenaire);
+        $entityManager=$this->getDoctrine()->getManager();
+
+
+##############################################################################
+         //$values = json_decode($request->getContent(),true);
+        $user=new User();
+
+            $form=$this->createForm(UserType::class,$user);
+            $form->handleRequest($request);
+            $values=$request->request->all();
+            $file=$request->files->all()[
+                "imageName"
+            ];
+          
+            $form->submit($values);
+            
+            $user->setRoles(["ROLE_USER_SIMPLE"]);
+            if ($form->isSubmitted() ) {
+                $hash = $passwordEncoder->encodePassword($user, $user->getPassword());
+                $user->setPassword($hash);
+    
+            $user->setImageFile($file);
+
+            $entityManager=$this->getDoctrine()->getManager();
+                $entityManager->persist($user);
+                $entityManager->flush();
+                return new Response('User Créé avec succé', Response::HTTP_CREATED);
+            }
+
+             $partenaire->setMatricule($values->matricule);
+        $partenaire->setNomPartenaire($values->nomPartenaire);
+        $partenaire->setNinea($values->ninea);
+        $partenaire->setEmailPartenaire($values->emailPartenaire);
+        $partenaire->setAdressePartenaire($values->adressePartenaire);
+        $partenaire->setTelephonePartenaire($values->telephonePartenaire);
+        $partenaire->setStatus($values->status);

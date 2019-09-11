@@ -27,6 +27,7 @@ class UserType extends AbstractType
             ->add('adresseUser')
             ->add('telephoneUser')
             ->add('statusUser')
+    
             ->add('imageFile', VichFileType::class)
             /*->add('Partenaire', EntityType::class,[
                 'class'=> Partenaire::class,
